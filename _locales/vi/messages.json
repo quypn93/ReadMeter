@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "ReadMeter — Thời gian đọc & Thanh tiến trình",
+    "description": "Tên extension hiển thị trên Chrome Web Store và trình duyệt"
+  },
+  "extDescription": {
+    "message": "Xem thời gian đọc ước tính và thanh tiến trình trên bất kỳ bài viết nào. Biết cần bao lâu để đọc và theo dõi tiến trình khi đọc.",
+    "description": "Mô tả extension hiển thị trên Chrome Web Store"
+  }
+}

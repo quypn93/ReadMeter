@@ -1,0 +1,69 @@
+/* ReadMeter — Content Script Styles */
+
+#readmeter-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: transparent;
+  z-index: 2147483647;
+  pointer-events: none;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+#readmeter-fill {
+  height: 100%;
+  width: 0%;
+  background: #4CAF50;
+  transition: width 0.15s ease-out;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 4px rgba(76, 175, 80, 0.4);
+}
+
+#readmeter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  padding: 4px 0;
+}
+
+#readmeter-badge .readmeter-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+#readmeter-badge .readmeter-separator {
+  color: #ccc;
+  margin: 0 2px;
+}
+
+#readmeter-info {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2147483646;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}

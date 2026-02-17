@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "ReadMeter — Read Time & Progress Bar",
+    "description": "Extension name shown in Chrome Web Store and browser"
+  },
+  "extDescription": {
+    "message": "See estimated reading time and a progress bar on any article. Know how long it takes and track your progress as you read.",
+    "description": "Extension description shown in Chrome Web Store"
+  }
+}
