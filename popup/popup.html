@@ -99,6 +99,58 @@
         </div>
       </div>
     </div>
+
+    <!-- Premium Section -->
+    <div id="premiumSection" class="section premium-section">
+      <!-- State: Free user (not activated) -->
+      <div id="premiumUpsell">
+        <div class="premium-header">
+          <span class="premium-badge-label">PRO</span>
+          <span class="premium-title">Upgrade to Premium</span>
+        </div>
+        <ul class="premium-features">
+          <li>Reading history & log</li>
+          <li>Daily/weekly reading goals</li>
+          <li>Export stats to CSV</li>
+          <li>Cloud sync across devices</li>
+          <li>Custom themes</li>
+        </ul>
+        <button id="buyBtn" class="btn btn-primary">Get Premium</button>
+        <div class="license-input-group">
+          <div class="license-divider">
+            <span>or enter license key</span>
+          </div>
+          <div class="license-row">
+            <input type="text" id="licenseKeyInput" class="license-input" placeholder="XXXX-XXXX-XXXX-XXXX">
+            <button id="activateBtn" class="btn btn-outline">Activate</button>
+          </div>
+          <div id="licenseError" class="license-error" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- State: Premium user (activated) -->
+      <div id="premiumActive" style="display:none;">
+        <div class="premium-header">
+          <span class="premium-badge-label active">PRO</span>
+          <span class="premium-title">Premium Active</span>
+        </div>
+        <div class="license-info">
+          <div class="license-info-row">
+            <span class="license-info-label">Email</span>
+            <span id="licenseEmail" class="license-info-value">--</span>
+          </div>
+          <div class="license-info-row">
+            <span class="license-info-label">Status</span>
+            <span id="licenseStatusText" class="license-status-badge">Active</span>
+          </div>
+          <div class="license-info-row">
+            <span class="license-info-label">Expires</span>
+            <span id="licenseExpires" class="license-info-value">Never</span>
+          </div>
+        </div>
+        <button id="deactivateBtn" class="btn btn-danger-text">Deactivate License</button>
+      </div>
+    </div>
   </div>
 
   <script src="popup.js"></script>

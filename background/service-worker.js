@@ -1,12 +1,30 @@
 /**
  * ReadMeter — Background Service Worker
- * Handles article detection messages and tracks reading stats.
+ * Handles article detection messages, tracks reading stats,
+ * and manages license validation via LemonSqueezy.
  */
 
-// Listen for messages from content scripts
+// Import license manager
+importScripts('../utils/license.js');
+
+// Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.type === 'articleDetected') {
     handleArticleDetected(message.data);
+  } else if (message.type === 'activateLicense') {
+    ReadMeterLicense.activate(message.licenseKey).then(sendResponse);
+    return true; // async
+  } else if (message.type === 'deactivateLicense') {
+    ReadMeterLicense.deactivate().then(sendResponse);
+    return true;
+  } else if (message.type === 'validateLicense') {
+    ReadMeterLicense.validate().then(sendResponse);
+    return true;
+  } else if (message.type === 'getLicenseStatus') {
+    ReadMeterLicense.getStatus().then(sendResponse);
+    return true;
+  } else if (message.type === 'openCheckout') {
+    ReadMeterLicense.openCheckout();
   }
 });
 
@@ -37,13 +55,20 @@ function handleArticleDetected(data) {
   });
 }
 
-// Clean up old stats (keep only last 7 days)
+// Clean up old stats and set up license validation
 chrome.runtime.onInstalled.addListener(function () {
   cleanupOldStats();
+  ReadMeterLicense.setupValidationAlarm();
 });
 
 chrome.runtime.onStartup.addListener(function () {
   cleanupOldStats();
+  ReadMeterLicense.setupValidationAlarm();
+});
+
+// Handle license validation alarm
+chrome.alarms.onAlarm.addListener(function (alarm) {
+  ReadMeterLicense.handleAlarm(alarm);
 });
 
 function cleanupOldStats() {

@@ -27,6 +27,7 @@
     loadSettings();
     loadStats();
     queryCurrentTab();
+    loadLicenseStatus();
   }
 
   /**
@@ -47,6 +48,18 @@
     elements.articleWords = document.getElementById('articleWords');
     elements.statArticles = document.getElementById('statArticles');
     elements.statTime = document.getElementById('statTime');
+
+    // Premium elements
+    elements.premiumUpsell = document.getElementById('premiumUpsell');
+    elements.premiumActive = document.getElementById('premiumActive');
+    elements.buyBtn = document.getElementById('buyBtn');
+    elements.licenseKeyInput = document.getElementById('licenseKeyInput');
+    elements.activateBtn = document.getElementById('activateBtn');
+    elements.licenseError = document.getElementById('licenseError');
+    elements.licenseEmail = document.getElementById('licenseEmail');
+    elements.licenseStatusText = document.getElementById('licenseStatusText');
+    elements.licenseExpires = document.getElementById('licenseExpires');
+    elements.deactivateBtn = document.getElementById('deactivateBtn');
   }
 
   /**
@@ -61,6 +74,14 @@
     elements.speedSlider.addEventListener('input', function () {
       elements.speedValue.textContent = elements.speedSlider.value + ' WPM';
       saveSettings();
+    });
+
+    // Premium events
+    elements.buyBtn.addEventListener('click', handleBuy);
+    elements.activateBtn.addEventListener('click', handleActivate);
+    elements.deactivateBtn.addEventListener('click', handleDeactivate);
+    elements.licenseKeyInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') handleActivate();
     });
   }
 
@@ -173,6 +194,128 @@
       elements.statArticles.textContent = stats.articles;
       elements.statTime.textContent = stats.totalMinutes;
     });
+  }
+
+  // ============================================================
+  // Premium / License Management
+  // ============================================================
+
+  /**
+   * Load and display current license status.
+   */
+  function loadLicenseStatus() {
+    chrome.runtime.sendMessage({ type: 'getLicenseStatus' }, function (response) {
+      if (chrome.runtime.lastError || !response) {
+        showUpsell();
+        return;
+      }
+
+      if (response.isPremium && response.license) {
+        showPremiumActive(response.license);
+      } else {
+        showUpsell();
+      }
+    });
+  }
+
+  /**
+   * Show the upsell/upgrade view.
+   */
+  function showUpsell() {
+    elements.premiumUpsell.style.display = 'block';
+    elements.premiumActive.style.display = 'none';
+    hideLicenseError();
+  }
+
+  /**
+   * Show the "premium active" view with license details.
+   */
+  function showPremiumActive(license) {
+    elements.premiumUpsell.style.display = 'none';
+    elements.premiumActive.style.display = 'block';
+
+    elements.licenseEmail.textContent = license.customerEmail || '--';
+
+    var status = license.licenseStatus || 'unknown';
+    elements.licenseStatusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+    if (license.expiresAt) {
+      var date = new Date(license.expiresAt);
+      elements.licenseExpires.textContent = date.toLocaleDateString();
+    } else {
+      elements.licenseExpires.textContent = 'Never';
+    }
+  }
+
+  /**
+   * Handle "Get Premium" button click — open checkout.
+   */
+  function handleBuy() {
+    chrome.runtime.sendMessage({ type: 'openCheckout' });
+  }
+
+  /**
+   * Handle license key activation.
+   */
+  function handleActivate() {
+    var key = elements.licenseKeyInput.value.trim();
+    if (!key) {
+      showLicenseError('Please enter a license key.');
+      return;
+    }
+
+    elements.activateBtn.disabled = true;
+    elements.activateBtn.textContent = '...';
+    hideLicenseError();
+
+    chrome.runtime.sendMessage({ type: 'activateLicense', licenseKey: key }, function (response) {
+      elements.activateBtn.disabled = false;
+      elements.activateBtn.textContent = 'Activate';
+
+      if (chrome.runtime.lastError) {
+        showLicenseError('Could not connect. Please try again.');
+        return;
+      }
+
+      if (response && response.success) {
+        showPremiumActive(response.data);
+      } else {
+        showLicenseError(response ? response.error : 'Activation failed.');
+      }
+    });
+  }
+
+  /**
+   * Handle license deactivation.
+   */
+  function handleDeactivate() {
+    elements.deactivateBtn.disabled = true;
+    elements.deactivateBtn.textContent = 'Deactivating...';
+
+    chrome.runtime.sendMessage({ type: 'deactivateLicense' }, function (response) {
+      elements.deactivateBtn.disabled = false;
+      elements.deactivateBtn.textContent = 'Deactivate License';
+
+      if (response && response.success) {
+        elements.licenseKeyInput.value = '';
+        showUpsell();
+      }
+    });
+  }
+
+  /**
+   * Show a license error message.
+   */
+  function showLicenseError(message) {
+    elements.licenseError.textContent = message;
+    elements.licenseError.style.display = 'block';
+  }
+
+  /**
+   * Hide the license error message.
+   */
+  function hideLicenseError() {
+    elements.licenseError.style.display = 'none';
   }
 
   // Initialize when DOM is ready

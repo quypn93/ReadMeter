@@ -409,6 +409,8 @@ function createProgressBar(settings) {
 
 ### Phase 4: Growth & Premium (tháng 2-3)
 
+- [x] LemonSqueezy payment integration (license key activation/validation)
+- [x] Premium UI trong popup (upsell + license management)
 - [ ] Reading stats dashboard (articles read, time spent)
 - [ ] Reading history
 - [ ] Daily/weekly reading goals
@@ -419,28 +421,50 @@ function createProgressBar(settings) {
 
 ## 8. Monetization Strategy
 
-### Option A: Hoàn toàn miễn phí (Recommended ban đầu)
+### Payment Provider: LemonSqueezy
 
-- Mục đích: thu hút users nhanh nhất, build reputation trên Chrome Web Store
-- Monetize gián tiếp: link đến các extension premium khác
-- Extension này là **top-of-funnel** — người dùng biết đến bạn → convert sang paid products
+Sử dụng **LemonSqueezy** (https://lemonsqueezy.com) làm payment provider vì:
 
-### Option B: Freemium nhẹ
+- Merchant of Record — LemonSqueezy xử lý thuế, VAT, hoá đơn cho tất cả quốc gia
+- License Key API — tích hợp trực tiếp vào Chrome extension, không cần backend riêng
+- Phí: 5% + $0.50/giao dịch (hợp lý cho sản phẩm nhỏ)
+- Dashboard quản lý customers, subscriptions, license keys
+- Hỗ trợ cả one-time payment và subscription
 
-| Free            | Premium ($2-3/tháng) |
-| --------------- | -------------------- |
-| Read time badge | Reading history log  |
-| Progress bar    | Daily reading goals  |
-| Basic settings  | Export stats         |
-|                 | Cloud sync           |
-|                 | Custom themes        |
+### Flow thanh toán trong extension
 
-### Option C: Donation-ware
+```
+User click "Get Premium" trong popup
+    → Mở LemonSqueezy checkout page (new tab)
+    → User thanh toán bằng card/PayPal
+    → Nhận license key qua email
+    → Nhập license key vào extension popup
+    → Extension gọi LemonSqueezy License API để activate
+    → Premium features được unlock
+    → Background worker validate license 1 lần/ngày
+```
 
-- Hoàn toàn free, thêm "Buy me a coffee" link trong popup
-- BlurWeb ($18K/năm) và nhiều extension khác thành công với model này
+### Freemium Model (Recommended)
 
-**Khuyến nghị:** Bắt đầu với Option A (free hoàn toàn) → nếu đạt 10K+ users → chuyển sang Option B.
+| Free                    | Premium ($2-3/tháng hoặc $20/năm)   |
+| ----------------------- | ------------------------------------ |
+| Read time badge         | Reading history & log                |
+| Progress bar            | Daily/weekly reading goals           |
+| Basic settings          | Export stats ra CSV                  |
+| Language detection      | Cloud sync across devices            |
+| Daily stats (7 ngày)    | Custom themes                        |
+|                         | Unlimited stats history              |
+
+### Technical Implementation
+
+- **Module:** `utils/license.js` — LemonSqueezy License API client
+- **Activate:** `POST /v1/licenses/activate` — khi user nhập key
+- **Validate:** `POST /v1/licenses/validate` — chạy tự động 1 lần/ngày via Chrome Alarms
+- **Deactivate:** `POST /v1/licenses/deactivate` — khi user muốn chuyển thiết bị
+- **Security:** Hard-code `store_id` và `product_id` để verify license thuộc đúng product
+- **Graceful degradation:** Network error không lock user ra khỏi premium features
+
+Xem chi tiết setup tại `PAYMENT_SETUP.md`.
 
 ---
 
@@ -474,4 +498,4 @@ function createProgressBar(settings) {
 
 ### Kết luận
 
-ReadMeter không phải extension kiếm tiền trực tiếp. Nó là **con ngựa Trojan** — build nhanh, thu hút users, establish credibility trên Chrome Web Store, và tạo funnel dẫn đến các sản phẩm premium khác.
+ReadMeter bắt đầu là một free tool để thu hút users nhanh. Với LemonSqueezy integration, extension có thể chuyển sang freemium model khi đạt đủ user base (10K+). Free tier vẫn giữ đầy đủ core features, premium tier cung cấp reading history, goals, export và sync — những tính năng mà power users sẵn sàng trả tiền.
